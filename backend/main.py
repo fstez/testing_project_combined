@@ -8,13 +8,15 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 RAKENDUSE_NIMI = "Kvaliteedijälg API"
+
+# Avalike API-de põhiressursid
 JSONPLACEHOLDER_URL = "https://jsonplaceholder.typicode.com/posts/1"
 RICK_MORTY_URL = "https://rickandmortyapi.com/api/character/1"
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("kvaliteedijalg.backend")
 
-rakendus = FastAPI(title=RAKENDUSE_NIMI, version="0.1.0")
+rakendus = FastAPI(title=RAKENDUSE_NIMI, version="0.2.0")
 
 rakendus.add_middleware(
     CORSMiddleware,
@@ -26,14 +28,17 @@ rakendus.add_middleware(
 
 
 def hanki_andmed(url: str) -> Dict[str, Any]:
-    """Pärib välise API ja tagastab JSON andmed tõrke korral HTTP veana."""
+    """Pärib välise API ja tagastab JSON andmed või viskab HTTP 502."""
     try:
         logger.info("Pärin välise API", extra={"siht": url})
         vastus = requests.get(url, timeout=5)
         vastus.raise_for_status()
         return vastus.json()
+
     except requests.RequestException as viga:
         logger.error("Välise API tõrge", exc_info=viga, extra={"siht": url})
+
+        # Tagastame täpsemad 502 detailid
         raise HTTPException(
             status_code=502,
             detail={
@@ -46,34 +51,36 @@ def hanki_andmed(url: str) -> Dict[str, Any]:
 
 @rakendus.get("/status")
 def tervise_kontroll() -> Dict[str, str]:
-    """Lihtne töökindluse kontroll, mida saab monitoringus pingida."""
+    """Kontrollib, kas backend töötab."""
     return {"olek": "aktiivne", "allikas": RAKENDUSE_NIMI}
 
 
 @rakendus.get("/api/koond")
 def koonda_andmed() -> Dict[str, Any]:
-    """Kombineerib JSONPlaceholderi ja Rick & Morty andmed testitavasse struktuuri."""
+    """Kombineerib JSONPlaceholderi + Rick & Morty API vastused ühtsesse skeemi."""
+    logger.info("Alustan koondpäringut")
+
     postitus = hanki_andmed(JSONPLACEHOLDER_URL)
     tegelane = hanki_andmed(RICK_MORTY_URL)
 
     logger.info(
-        "Koondan API vastuseid",
+        "Koondamine õnnestus",
         extra={"allikad": [JSONPLACEHOLDER_URL, RICK_MORTY_URL]},
     )
 
-    koond = {
+    paastiku_aeg = datetime.now(timezone.utc).isoformat()
+
+    return {
         "postitus": {
             "id": postitus.get("id"),
             "pealkiri": postitus.get("title"),
-            "katkend": postitus.get("body", "")[:80],
+            "katkend": (postitus.get("body") or "")[:120],
         },
         "tegelane": {
             "id": tegelane.get("id"),
             "nimi": tegelane.get("name"),
-            "staatuse": tegelane.get("status"),
+            "staatus": tegelane.get("status"),
         },
-        "allikad": [JSONPLACEHOLDER_URL, RICK_MORTY_URL],
-        "paastikuAeg": datetime.now(timezone.utc).isoformat(),
+        "allikad": ["JSONPlaceholder", "Rick & Morty API"],
+        "paastikuAeg": paastiku_aeg,
     }
-
-    return koond
