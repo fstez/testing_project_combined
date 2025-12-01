@@ -1,4 +1,5 @@
 """FastAPI rakendus avalike API-de koondamiseks ja testimiseks."""
+
 from datetime import datetime, timezone
 import logging
 from typing import Any, Dict
@@ -7,14 +8,32 @@ import requests
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
+
+# ---------------------------------------------------------
+# Konfiguratsioon ja konstantsed väärtused
+# ---------------------------------------------------------
+
 RAKENDUSE_NIMI = "Kvaliteedijälg API"
 JSONPLACEHOLDER_URL = "https://jsonplaceholder.typicode.com/posts/1"
 RICK_MORTY_URL = "https://rickandmortyapi.com/api/character/1"
 
+
+# ---------------------------------------------------------
+# Logimise seadistus
+# ---------------------------------------------------------
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("kvaliteedijalg.backend")
 
-rakendus = FastAPI(title=RAKENDUSE_NIMI, version="0.1.0")
+
+# ---------------------------------------------------------
+# FastAPI rakenduse seadistus
+# ---------------------------------------------------------
+
+rakendus = FastAPI(
+    title=RAKENDUSE_NIMI,
+    version="0.1.0"
+)
 
 rakendus.add_middleware(
     CORSMiddleware,
@@ -25,6 +44,10 @@ rakendus.add_middleware(
 )
 
 
+# ---------------------------------------------------------
+# Abifunktsioon: väliste API-de päring
+# ---------------------------------------------------------
+
 def hanki_andmed(url: str) -> Dict[str, Any]:
     """Pärib välise API ja tagastab JSON andmed tõrke korral HTTP veana."""
     try:
@@ -32,6 +55,7 @@ def hanki_andmed(url: str) -> Dict[str, Any]:
         vastus = requests.get(url, timeout=5)
         vastus.raise_for_status()
         return vastus.json()
+
     except requests.RequestException as viga:
         logger.error("Välise API tõrge", exc_info=viga, extra={"siht": url})
         raise HTTPException(
@@ -44,16 +68,24 @@ def hanki_andmed(url: str) -> Dict[str, Any]:
         ) from viga
 
 
+# ---------------------------------------------------------
+# API endpointid
+# ---------------------------------------------------------
+
 @rakendus.get("/status")
 def tervise_kontroll() -> Dict[str, str]:
     """Lihtne töökindluse kontroll, mida saab monitoringus pingida."""
-    return {"olek": "aktiivne", "allikas": RAKENDUSE_NIMI}
+    return {
+        "olek": "aktiivne",
+        "allikas": RAKENDUSE_NIMI
+    }
 
 
 @rakendus.get("/api/koond")
 def koonda_andmed() -> Dict[str, Any]:
     """Kombineerib JSONPlaceholderi ja Rick & Morty andmed testitavasse struktuuri."""
     allikad = [JSONPLACEHOLDER_URL, RICK_MORTY_URL]
+
     try:
         postitus = hanki_andmed(JSONPLACEHOLDER_URL)
         tegelane = hanki_andmed(RICK_MORTY_URL)
@@ -72,11 +104,14 @@ def koonda_andmed() -> Dict[str, Any]:
             "allikad": allikad,
             "paastikuAeg": datetime.now(timezone.utc).isoformat(),
         }
+
         logger.info("Koondan API vastuseid", extra={"allikad": allikad})
         return koond
+
     except HTTPException as viga:
         logger.error("Koondamise käigus ilmnes viga", exc_info=viga, extra={"allikad": allikad})
         raise viga
+
     except Exception as viga:
         logger.critical("Ettearvamatu viga koondamisel", exc_info=viga, extra={"allikad": allikad})
         raise HTTPException(
