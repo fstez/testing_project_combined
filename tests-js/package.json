@@ -1,0 +1,12 @@
+{
+  "name": "kvaliteedijalg-tests",
+  "version": "0.1.0",
+  "description": "Jest testid A/B loogika valideerimiseks",
+  "scripts": {
+    "test": "jest --runInBand"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}
+

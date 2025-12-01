@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="et">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kvaliteedijälg – A/B katse</title>
+    <link rel="stylesheet" href="./style.css" />
+    <script>
+      window.GA_MOOTMISTUNNUS = window.GA_MOOTMISTUNNUS || "G-XXXXTEST";
+      window.API_URL = window.API_URL || "http://localhost:8000/api/koond";
+    </script>
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-XXXXTEST"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", window.GA_MOOTMISTUNNUS, {
+        debug_mode: true,
+      });
+    </script>
+  </head>
+  <body>
+    <header>
+      <h1>Kvaliteedijälg</h1>
+      <p class="sissejuhatus">
+        See leht ühendab avalikud API-d, GA4 sündmused ja A/B variandid.
+        Kasuta seda tööriistana testistrateegia harjutamisel.
+      </p>
+    </header>
+
+    <main>
+      <section class="variantide-plokk">
+        <div class="nupud">
+          <button id="variant-toggle">Vaheta varianti</button>
+          <span id="valiku-label" aria-live="polite"></span>
+        </div>
+        <div id="variant-container" class="variant-container"></div>
+      </section>
+
+      <section class="andmete-plokk">
+        <h2>Koond API vastus</h2>
+        <p id="api-staatus" class="status">Ootan päringut…</p>
+        <pre id="api-tulemused" aria-live="polite"></pre>
+      </section>
+
+      <section class="juhendid">
+        <h2>Kontrollnimekiri</h2>
+        <ul>
+          <li>Käivita backend ja veendu, et `/api/koond` töötab.</li>
+          <li>
+            Kontrolli brauseri võrgupaneelis, et GA sündmus `variant_vaade`
+            saadetakse.
+          </li>
+          <li>
+            Kogu ekraanipildid `docs/results/analytics/` kausta ja lisa märkmed
+            testiplaani.
+          </li>
+        </ul>
+      </section>
+    </main>
+
+    <script src="./ab.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
+

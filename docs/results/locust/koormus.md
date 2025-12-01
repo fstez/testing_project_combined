@@ -1,0 +1,5 @@
+![koormus](image.png)
+![koormus2](image-1.png)
+![koormus3](image-2.png)
+![koormus4](image-3.png)
+![koormus5](image-4.png)

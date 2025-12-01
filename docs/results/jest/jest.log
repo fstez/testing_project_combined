@@ -1,0 +1,19 @@
+
+> kvaliteedijalg-tests@0.1.0 test
+> jest --runInBand
+
+PASS __tests__/ab.test.js
+  A/B loogika
+    √ valiVariant tagastab olemasoleva variandi (3 ms)
+    √ valiVariant kasutab juhuarvu deterministlikult (1 ms)
+    √ vahetaVariant annab teise variandi (1 ms)
+    √ looLayoutHTML sisaldab variandi märksõnu (1 ms)
+    √ looSyndmuseKeha lisab metaandmed (4 ms)
+  salvestamine
+    √ andmete salvestamine localStorage-sse
+
+Test Suites: 1 passed, 1 total
+Tests:       6 passed, 6 total
+Snapshots:   0 total
+Time:        0.491 s, estimated 1 s
+Ran all test suites.
